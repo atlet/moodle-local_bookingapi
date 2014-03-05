@@ -39,25 +39,25 @@ class local_bookingapi_external extends external_api {
      * @return string welcome message
      */
     public static function bookings($courseid = '0') {
-        global $USER;
+        global $DB;
 
         //Parameter validation
         //REQUIRED
         $params = self::validate_parameters(self::bookings_parameters(),
                 array('courseid' => $courseid));
 
-        //Context validation
-        //OPTIONAL but in most web service it should present
-        $context = context_user::instance($USER->id);
-        self::validate_context($context);
+        $bookings = $DB->get_records("booking", array("course" => $courseid));
 
-        //Capability checking
-        //OPTIONAL but in most web service it should present
-        if (!has_capability('moodle/user:viewdetails', $context)) {
-            throw new moodle_exception('cannotviewprofile');
+        foreach ($bookings as $booking) {
+            $records = $DB->get_records('booking_options', array('bookingid' => $booking->id));
+            $booking->booking_options = new stdClass();
+            foreach ($records as $record) {
+                $booking->booking_options->{$record->id} = new stdClass();
+                $booking->booking_options->{$record->id} = $record;
+            }
         }
 
-        return "Vrnem: " . $params['courseid'];
+        return json_encode($bookings, JSON_PRETTY_PRINT);
     }
 
     /**
@@ -65,7 +65,7 @@ class local_bookingapi_external extends external_api {
      * @return external_description
      */
     public static function bookings_returns() {
-        return new external_value(PARAM_TEXT, 'All bokings for course.');
+        return new external_value(PARAM_RAW, 'All bokings for course.');
     }
 
 
