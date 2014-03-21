@@ -54,6 +54,23 @@ class local_bookingapi_external extends external_api {
             foreach ($records as $record) {
                 $booking->booking_options->{$record->id} = new stdClass();
                 $booking->booking_options->{$record->id} = $record;
+
+                $users = $DB->get_records('booking_answers', array('bookingid' => $record->bookingid, 'optionid' => $record->id));
+
+                foreach ($users as $user) {
+                    $ruser = $DB->get_record('user', array('id' => $user->userid));
+                    $booking->booking_options->{$record->id}->users->{$ruser->id} = new stdClass();
+                    $booking->booking_options->{$record->id}->users->{$ruser->id} = $ruser;
+                }
+
+                $users = $DB->get_records('booking_teachers', array('bookingid' => $record->bookingid, 'optionid' => $record->id));
+
+                foreach ($users as $user) {
+                    $ruser = $DB->get_record('user', array('id' => $user->userid));
+                    $booking->booking_options->{$record->id}->teachers->{$ruser->id} = new stdClass();
+                    $booking->booking_options->{$record->id}->teachers->{$ruser->id} = $ruser;
+                }
+
             }
         }
 
