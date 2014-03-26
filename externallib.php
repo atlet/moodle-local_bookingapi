@@ -20,7 +20,11 @@
  * @copyright  2014 Andraž Prinčič (http://www.princic.net)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+
+require_once("../../config.php");
 require_once($CFG->libdir . "/externallib.php");
+require_once($CFG->libdir . "/filelib.php");
+require_once($CFG->libdir . "/datalib.php");
 
 class local_bookingapi_external extends external_api {
 
@@ -50,6 +54,13 @@ class local_bookingapi_external extends external_api {
 
         foreach ($bookings as $booking) {
             $records = $DB->get_records('booking_options', array('bookingid' => $booking->id));
+
+            $cm = get_coursemodule_from_instance('booking', $booking->id);
+            $context = context_module::instance($cm->id);
+
+            $booking->intro = file_rewrite_pluginfile_urls($booking->intro, 'pluginfile.php',
+            $context->id, 'mod_booking', 'intro', null);
+
             $booking->booking_options = new stdClass();
             foreach ($records as $record) {
                 $booking->booking_options->{$record->id} = new stdClass();
