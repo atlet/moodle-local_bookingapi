@@ -34,10 +34,10 @@ class local_bookingapi_external extends external_api {
      */
     public static function bookings_parameters() {
         return new external_function_parameters(
-                array('courseid' => new external_value(PARAM_TEXT, 'Course id', VALUE_DEFAULT, '0'))
-        );
+            array('courseid' => new external_value(PARAM_TEXT, 'Course id', VALUE_DEFAULT, '0'))
+            );
     }
-
+    
     /**
      * Returns welcome message
      * @return string welcome message
@@ -48,7 +48,7 @@ class local_bookingapi_external extends external_api {
         //Parameter validation
         //REQUIRED
         $params = self::validate_parameters(self::bookings_parameters(),
-                array('courseid' => $courseid));
+            array('courseid' => $courseid));
 
         $bookings = $DB->get_records("booking", array("course" => $courseid));
 
@@ -59,7 +59,18 @@ class local_bookingapi_external extends external_api {
             $context = context_module::instance($cm->id);
 
             $booking->intro = file_rewrite_pluginfile_urls($booking->intro, 'pluginfile.php',
-            $context->id, 'mod_booking', 'intro', null);
+                $context->id, 'mod_booking', 'intro', null);
+
+            if ($booking->categoryid != '0') {
+                    $categoryies = explode(',', $booking->categoryid);
+
+                    if (count($categoryies) > 0) { 
+                        foreach ($categoryies as $category) {
+                            $booking->categories->{$category} = new stdClass();
+                            $booking->categories->{$category} = $DB->get_field('booking_category', 'name', array('id' => $category));
+                        }
+                    }
+                }
 
             $booking->booking_options = new stdClass();
             foreach ($records as $record) {
@@ -81,7 +92,6 @@ class local_bookingapi_external extends external_api {
                     $booking->booking_options->{$record->id}->teachers->{$ruser->id} = new stdClass();
                     $booking->booking_options->{$record->id}->teachers->{$ruser->id} = $ruser;
                 }
-
             }
         }
 
