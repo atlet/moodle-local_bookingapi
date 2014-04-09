@@ -7,9 +7,9 @@
 	// 4- Create a token for a specific user and for the service 'Booking API' (Admin > Plugins > Web services > Manage tokens)
 	// 5- Run this script directly from your browser: you should see 'Hello, FIRSTNAME'
 
-	// Change
+	// Lokalni
 	$token = 'f3f58b853c821edcc4aeb5e9d1f5e670'; // Token - from moodle - user must have rights
-	$domainname = 'http://192.168.1.138/moodle'; // Moodle URL
+	$domainname = 'http://192.168.1.107/moodle'; // Moodle URL
 	$courseroomid = '3'; // Course ID
 
 	// Don't touch ...

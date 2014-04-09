@@ -58,6 +58,7 @@ class local_bookingapi_external extends external_api {
             $cm = get_coursemodule_from_instance('booking', $booking->id);
             $context = context_module::instance($cm->id);
 
+		$booking->cm = $cm;
             $booking->intro = file_rewrite_pluginfile_urls($booking->intro, 'pluginfile.php',
                 $context->id, 'mod_booking', 'intro', null);
 
