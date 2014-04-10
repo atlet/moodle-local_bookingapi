@@ -34,7 +34,10 @@ class local_bookingapi_external extends external_api {
      */
     public static function bookings_parameters() {
         return new external_function_parameters(
-            array('courseid' => new external_value(PARAM_TEXT, 'Course id', VALUE_DEFAULT, '0'))
+            array(
+		'courseid' => new external_value(PARAM_TEXT, 'Course id', VALUE_DEFAULT, '0'),
+		'printusers' => new external_value(PARAM_TEXT, 'Print user profiles', VALUE_DEFAULT, '0')
+		)
             );
     }
     
@@ -42,13 +45,13 @@ class local_bookingapi_external extends external_api {
      * Returns welcome message
      * @return string welcome message
      */
-    public static function bookings($courseid = '0') {
+    public static function bookings($courseid = '0', $printusers = '0') {
         global $DB;
 
         //Parameter validation
         //REQUIRED
         $params = self::validate_parameters(self::bookings_parameters(),
-            array('courseid' => $courseid));
+            array('courseid' => $courseid, 'printusers' => $printusers));
 
         $bookings = $DB->get_records("booking", array("course" => $courseid));
 
@@ -78,16 +81,16 @@ class local_bookingapi_external extends external_api {
                 $booking->booking_options->{$record->id} = new stdClass();
                 $booking->booking_options->{$record->id} = $record;
 
+		if ($printusers) {
                 $users = $DB->get_records('booking_answers', array('bookingid' => $record->bookingid, 'optionid' => $record->id));
-
                 foreach ($users as $user) {
                     $ruser = $DB->get_record('user', array('id' => $user->userid));
                     $booking->booking_options->{$record->id}->users->{$ruser->id} = new stdClass();
                     $booking->booking_options->{$record->id}->users->{$ruser->id} = $ruser;
                 }
+		}
 
                 $users = $DB->get_records('booking_teachers', array('bookingid' => $record->bookingid, 'optionid' => $record->id));
-
                 foreach ($users as $user) {
                     $ruser = $DB->get_record('user', array('id' => $user->userid));
                     $booking->booking_options->{$record->id}->teachers->{$ruser->id} = new stdClass();
@@ -96,7 +99,7 @@ class local_bookingapi_external extends external_api {
             }
         }
 
-        return json_encode($bookings, JSON_PRETTY_PRINT);
+        return json_encode($bookings);
     }
 
     /**
