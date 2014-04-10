@@ -76,6 +76,12 @@ class local_bookingapi_external extends external_api {
                     }
                 }
 
+		$allCategories = $DB->get_records('booking_category', array('course' => $courseid));
+		foreach ($allCategories as $category) {
+			$booking->all_categories->{$category->id} = new stdClass();
+			$booking->all_categories->{$category->id} = $category;
+		}
+
             $booking->booking_options = new stdClass();
             foreach ($records as $record) {
                 $booking->booking_options->{$record->id} = new stdClass();
