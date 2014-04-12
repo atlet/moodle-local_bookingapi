@@ -65,10 +65,11 @@ class local_bookingapi_external extends external_api {
             $booking->intro = file_rewrite_pluginfile_urls($booking->intro, 'pluginfile.php',
                 $context->id, 'mod_booking', 'intro', null);
 
+		$booking->categories = new stdClass();
             if ($booking->categoryid != '0') {
                     $categoryies = explode(',', $booking->categoryid);
-
-                    if (count($categoryies) > 0) { 
+		
+		if (!empty($categoryies) && count($categoryies) > 0) { 
                         foreach ($categoryies as $category) {
                             $booking->categories->{$category} = new stdClass();
                             $booking->categories->{$category} = $DB->get_field('booking_category', 'name', array('id' => $category));
@@ -76,6 +77,7 @@ class local_bookingapi_external extends external_api {
                     }
                 }
 
+		$booking->all_categories = new stdClass();
 		$allCategories = $DB->get_records('booking_category', array('course' => $courseid));
 		foreach ($allCategories as $category) {
 			$booking->all_categories->{$category->id} = new stdClass();
@@ -88,6 +90,7 @@ class local_bookingapi_external extends external_api {
                 $booking->booking_options->{$record->id} = $record;
 
 		if ($printusers) {
+		$booking->booking_options->{$record->id}->users = new stdClass();
                 $users = $DB->get_records('booking_answers', array('bookingid' => $record->bookingid, 'optionid' => $record->id));
                 foreach ($users as $user) {
                     $ruser = $DB->get_record('user', array('id' => $user->userid));
@@ -96,6 +99,7 @@ class local_bookingapi_external extends external_api {
                 }
 		}
 
+		$booking->booking_options->{$record->id}->teachers = new stdClass();
                 $users = $DB->get_records('booking_teachers', array('bookingid' => $record->bookingid, 'optionid' => $record->id));
                 foreach ($users as $user) {
                     $ruser = $DB->get_record('user', array('id' => $user->userid));
@@ -105,7 +109,7 @@ class local_bookingapi_external extends external_api {
             }
         }
 
-        return json_encode($bookings);
+        return json_encode($bookings, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
     }
 
     /**
