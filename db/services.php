@@ -29,13 +29,20 @@ $functions = array(
                 'classpath'   => 'local/bookingapi/externallib.php',
                 'description' => 'Return bookings for course id.',
                 'type'        => 'read',
+        ),
+	'local_bookingapi_categories' => array(
+                'classname'   => 'local_bookingapi_external',
+                'methodname'  => 'categories',
+                'classpath'   => 'local/bookingapi/externallib.php',
+                'description' => 'Return categories for course id.',
+                'type'        => 'read',
         )
 );
 
 // We define the services to install as pre-build services. A pre-build service is not editable by administrator.
 $services = array(
         'Booking API' => array(
-                'functions' => array ('local_bookingapi_bookings'),
+                'functions' => array ('local_bookingapi_bookings', 'local_bookingapi_categories'),
                 'restrictedusers' => 0,
                 'enabled'=>1,
         )
