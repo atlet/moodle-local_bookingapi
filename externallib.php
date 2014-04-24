@@ -36,7 +36,8 @@ class local_bookingapi_external extends external_api {
         return new external_function_parameters(
             array(
 		'courseid' => new external_value(PARAM_TEXT, 'Course id', VALUE_DEFAULT, '0'),
-		'printusers' => new external_value(PARAM_TEXT, 'Print user profiles', VALUE_DEFAULT, '0')
+		'printusers' => new external_value(PARAM_TEXT, 'Print user profiles', VALUE_DEFAULT, '0'),
+		'days' => new external_value(PARAM_TEXT, 'How old bookings to retrive - in days.', VALUE_DEFAULT, '0')
 		)
             );
     }
@@ -68,7 +69,7 @@ class local_bookingapi_external extends external_api {
 		return $returns;
 	}
 
-	public static function bookings($courseid = '0', $printusers = '0') {
+	public static function bookings($courseid = '0', $printusers = '0', $days = '0') {
         global $DB;
 
 	$returns = array();
@@ -76,12 +77,22 @@ class local_bookingapi_external extends external_api {
         //Parameter validation
         //REQUIRED
         $params = self::validate_parameters(self::bookings_parameters(),
-            array('courseid' => $courseid, 'printusers' => $printusers));
+            array('courseid' => $courseid, 'printusers' => $printusers, 'days' => $days));
 
-        $bookings = $DB->get_records("booking", array("course" => $courseid));
+	$options = 'course = ' . $courseid;
+
+        $bookings = $DB->get_records_select("booking", $options);
 
         foreach ($bookings as $booking) {
-            	$records = $DB->get_records('booking_options', array('bookingid' => $booking->id));
+
+		$options = 'bookingid = ' . $booking->id;
+
+		if ($days > 0) {
+			$timediff = strtotime('-' . $days  . ' day');
+			$options .= ' AND (coursestarttime = 0 OR coursestarttime  > ' . $timediff  . ')';
+		}
+		 
+            	$records = $DB->get_records_select('booking_options', $options);
 
 		$cm = get_coursemodule_from_instance('booking', $booking->id);
             	$context = context_module::instance($cm->id);
