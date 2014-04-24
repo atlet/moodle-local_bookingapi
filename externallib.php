@@ -92,6 +92,7 @@ class local_bookingapi_external extends external_api {
 
 		$ret = array();
                 $ret['id'] = $booking->id;
+		$ret['cm'] = $booking->cm->id;
                 $ret['name'] = $booking->name;
                 $ret['intro'] = $booking->intro;
 		$ret['duration'] = $booking->duration;
@@ -195,6 +196,7 @@ class local_bookingapi_external extends external_api {
             new external_single_structure(
 		array(
 			'id' => new external_value(PARAM_INT,'Booking ID'),
+			'cm' => new external_value(PARAM_INT, 'CM'),
 			'name' => new external_value(PARAM_TEXT, 'Course name'),
 			'intro' => new external_value(PARAM_RAW, 'Description'),
 			'duration' => new external_value(PARAM_TEXT, 'Duration'),
