@@ -114,7 +114,7 @@ class local_bookingapi_external extends external_api {
 		$ret['options'] = array();
 	
 		$booking->categories = new stdClass();
-            	if ($booking->categoryid != '0') {
+            	if ($booking->categoryid != '0' && $booking->categoryid != '') {
                     $categoryies = explode(',', $booking->categoryid);
 		
 			if (!empty($categoryies) && count($categoryies) > 0) { 
