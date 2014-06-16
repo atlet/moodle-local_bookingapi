@@ -141,7 +141,8 @@ class local_bookingapi_external extends external_api {
 			$option['id'] = $record->id;
 			$option['text'] = $record->text;
 			$option['maxanswers'] = $record->maxanswers;
-			$option['coursestarttime'] = $record->coursestarttime;
+			$option['coursestarttime'] = $record->coursestarttime + usergetdate();
+			$option['coursestarttime'] = (int)$record->coursestarttime + (int)get_user_timezone_offset();
 			$option['courseendtime'] = $record->courseendtime;
 			$option['description'] = $record->description;
 			$option['location'] = $record->location;
