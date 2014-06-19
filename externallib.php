@@ -92,7 +92,8 @@ class local_bookingapi_external extends external_api {
 			$options .= ' AND (coursestarttime = 0 OR coursestarttime  > ' . $timediff  . ')';
 		}
 		 
-            	$records = $DB->get_records_select('booking_options', $options);
+            	$records = $DB->get_records_select('booking_options', $options, null, 'coursestarttime');
+		//$records = $DB->get_records_select('booking_options', $options);
 
 		$cm = get_coursemodule_from_instance('booking', $booking->id);
             	$context = context_module::instance($cm->id);
@@ -141,13 +142,12 @@ class local_bookingapi_external extends external_api {
 			$option['id'] = $record->id;
 			$option['text'] = $record->text;
 			$option['maxanswers'] = $record->maxanswers;
-			$option['coursestarttime'] = $record->coursestarttime + usergetdate();
-			$option['coursestarttime'] = (int)$record->coursestarttime + (int)get_user_timezone_offset();
+			$option['coursestarttime'] = $record->coursestarttime;
 			$option['courseendtime'] = $record->courseendtime;
 			$option['description'] = $record->description;
 			$option['location'] = $record->location;
 			$option['institution'] = $record->institution;
-			$option['address'] = $option->address;
+			$option['address'] = $record->address;
 			$option['users'] = array();
 			$option['teachers'] = array();
 
