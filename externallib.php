@@ -102,6 +102,8 @@ class local_bookingapi_external extends external_api {
             	$booking->intro = file_rewrite_pluginfile_urls($booking->intro, 'pluginfile.php',
                 $context->id, 'mod_booking', 'intro', null);
 
+		$manager = $DB->get_record('user', array('username'=>$booking->bookingmanager));
+
 		$ret = array();
                 $ret['id'] = $booking->id;
 		$ret['cm'] = $booking->cm->id;
@@ -111,6 +113,9 @@ class local_bookingapi_external extends external_api {
 		$ret['points'] = $booking->points;
 		$ret['organizatorname'] = $booking->organizatorname;
 		$ret['eventtype'] = $booking->eventtype;
+		$ret['bookingmanagername'] = $manager->firstname;
+		$ret['bookingmanagersurname'] = $manager->lastname;
+		$ret['bookingmanageremail'] = $manager->email;
 		$ret['categories'] = array();	
 		$ret['options'] = array();
 	
@@ -215,6 +220,9 @@ class local_bookingapi_external extends external_api {
 			'points' => new external_value(PARAM_RAW, 'Points'),
 			'organizatorname' => new external_value(PARAM_TEXT, 'Organizator name'),
 			'eventtype' => new external_value(PARAM_TEXT, 'Event type'),
+			'bookingmanagername' => new external_value(PARAM_TEXT, 'Booking manager name'),
+			'bookingmanagersurname' => new external_value(PARAM_TEXT, 'Booking manager surname'),
+			'bookingmanageremail' => new external_value(PARAM_TEXT, 'Booking manager e-mail'),
 			'categories' => new external_multiple_structure(new external_single_structure(
 				array(
 					'id' => new external_value(PARAM_INT,'Category ID'),

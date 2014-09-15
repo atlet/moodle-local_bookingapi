@@ -9,7 +9,7 @@
 
 	// Lokalni
 	$token = 'f3f58b853c821edcc4aeb5e9d1f5e670'; // Token - from moodle - user must have rights
-	$domainname = 'http://192.168.1.107/moodle'; // Moodle URL
+	$domainname = 'http://192.168.1.178/moodle'; // Moodle URL
 	$courseroomid = '3'; // Course ID
 
 	// Don't touch ...
@@ -21,6 +21,5 @@
 	$curl = new curl;
 	$post = xmlrpc_encode_request($functionname, array($courseroomid));
 	$resp = xmlrpc_decode($curl->post($serverurl, $post));
-
-	echo $resp;
+	var_dump($resp);
 ?>
