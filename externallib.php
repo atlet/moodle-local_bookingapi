@@ -72,13 +72,13 @@ class local_bookingapi_external extends external_api {
         global $DB;
 
         $returns = array();
-
+        
         //Parameter validation
         //REQUIRED
         $params = self::validate_parameters(self::bookings_parameters(), array('courseid' => $courseid, 'printusers' => $printusers, 'days' => $days));
-
-        $options = 'course = ' . $courseid;
-
+        
+        $options = 'course = ' . $courseid;       
+ 
         $bookings = $DB->get_records_select("booking", $options);
 
         foreach ($bookings as $booking) {
@@ -97,7 +97,7 @@ class local_bookingapi_external extends external_api {
 
             $cm = get_coursemodule_from_instance('booking', $booking->id);
             
-            if ($cm->visible == "1") {
+            if (strcmp($cm->visible, "1") == 0) {
                 $context = context_module::instance($cm->id);
 
                 $booking->cm = $cm;
