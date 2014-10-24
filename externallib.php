@@ -54,7 +54,7 @@ class local_bookingapi_external extends external_api {
 
         $returns = array();
 
-        $allCategories = $DB->get_records('booking_category', array('course' => $courseid));
+        $allCategories = $DB->get_records('booking_category', array('course' => $courseid), 'cid ASC');
         foreach ($allCategories as $category) {
             $cat = array();
 
@@ -72,19 +72,19 @@ class local_bookingapi_external extends external_api {
         global $DB;
 
         $returns = array();
-        
+
         //Parameter validation
         //REQUIRED
         $params = self::validate_parameters(self::bookings_parameters(), array('courseid' => $courseid, 'printusers' => $printusers, 'days' => $days));
-        
-        $options = 'course = ' . $courseid;       
- 
+
+        $options = 'course = ' . $courseid;
+
         $bookings = $DB->get_records_select("booking", $options);
 
         foreach ($bookings as $booking) {
 
             $ret = array();
-            
+
             $options = 'bookingid = ' . $booking->id;
 
             if ($days > 0) {
@@ -96,7 +96,7 @@ class local_bookingapi_external extends external_api {
             //$records = $DB->get_records_select('booking_options', $options);
 
             $cm = get_coursemodule_from_instance('booking', $booking->id);
-            
+
             if (strcmp($cm->visible, "1") == 0) {
                 $context = context_module::instance($cm->id);
 
@@ -104,7 +104,7 @@ class local_bookingapi_external extends external_api {
                 $booking->intro = file_rewrite_pluginfile_urls($booking->intro, 'pluginfile.php', $context->id, 'mod_booking', 'intro', null);
 
                 $manager = $DB->get_record('user', array('username' => $booking->bookingmanager));
-                
+
                 $ret['id'] = $booking->id;
                 $ret['cm'] = $booking->cm->id;
                 $ret['name'] = $booking->name;

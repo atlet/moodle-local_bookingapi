@@ -10,10 +10,10 @@
 	// Lokalni
 	$token = 'f3f58b853c821edcc4aeb5e9d1f5e670'; // Token - from moodle - user must have rights
 	$domainname = 'http://192.168.1.178/moodle'; // Moodle URL
-	$courseroomid = '4'; // Course ID
+	$courseroomid = '3'; // Course ID
 
 	// Don't touch ...
-	$functionname = 'local_bookingapi_bookings';
+	$functionname = 'local_bookingapi_categories';
 
 	header('Content-Type: text/plain');
 	$serverurl = $domainname . '/webservice/xmlrpc/server.php'. '?wstoken=' . $token;
