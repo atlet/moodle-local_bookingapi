@@ -8,12 +8,12 @@
 	// 5- Run this script directly from your browser: you should see 'Hello, FIRSTNAME'
 
 	// Lokalni
-	$token = 'f3f58b853c821edcc4aeb5e9d1f5e670'; // Token - from moodle - user must have rights
-	$domainname = 'http://192.168.1.178/moodle'; // Moodle URL
-	$courseroomid = '3'; // Course ID
+	$token = 'ecc26865907342f2b07fac10cc2298cb'; // Token - from moodle - user must have rights
+	$domainname = 'http://www.moodle.dev'; // Moodle URL
+	$courseroomid = '8756'; // Course ID
 
 	// Don't touch ...
-	$functionname = 'local_bookingapi_categories';
+	$functionname = 'local_bookingapi_bookings';
 
 	header('Content-Type: text/plain');
 	$serverurl = $domainname . '/webservice/xmlrpc/server.php'. '?wstoken=' . $token;

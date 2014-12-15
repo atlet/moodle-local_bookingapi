@@ -69,59 +69,55 @@ class local_bookingapi_external extends external_api {
     }
 
     public static function bookings($courseid = '0', $printusers = '0', $days = '0') {
-        global $DB;
+        global $DB, $CFG;
 
+        require_once($CFG->dirroot . '/mod/booking/locallib.php');
+        
         $returns = array();
 
         //Parameter validation
         //REQUIRED
         $params = self::validate_parameters(self::bookings_parameters(), array('courseid' => $courseid, 'printusers' => $printusers, 'days' => $days));
 
-        $options = 'course = ' . $courseid;
-
-        $bookings = $DB->get_records_select("booking", $options);
+        $bookings = $DB->get_records_select("booking", "course = {$courseid}");
 
         foreach ($bookings as $booking) {
 
             $ret = array();
-
-            $options = 'bookingid = ' . $booking->id;
-
+            $cm = get_coursemodule_from_instance('booking', $booking->id);
+        
+            $options = array();
+            
             if ($days > 0) {
                 $timediff = strtotime('-' . $days . ' day');
-                $options .= ' AND (coursestarttime = 0 OR coursestarttime  > ' . $timediff . ')';
-            }
-
-            $records = $DB->get_records_select('booking_options', $options, null, 'coursestarttime');
-            //$records = $DB->get_records_select('booking_options', $options);
-
-            $cm = get_coursemodule_from_instance('booking', $booking->id);
+                $options['coursestarttime'] = $timediff;
+            }            
 
             if (strcmp($cm->visible, "1") == 0) {
+                $bookingData = new booking_options($cm->id, FALSE, $options);  
+                $bookingData->apply_tags();
                 $context = context_module::instance($cm->id);
 
-                $booking->cm = $cm;
-                $booking->intro = file_rewrite_pluginfile_urls($booking->intro, 'pluginfile.php', $context->id, 'mod_booking', 'intro', null);
+                $bookingData->booking->intro = file_rewrite_pluginfile_urls($bookingData->booking->intro, 'pluginfile.php', $context->id, 'mod_booking', 'intro', null);
 
-                $manager = $DB->get_record('user', array('username' => $booking->bookingmanager));
+                $manager = $DB->get_record('user', array('username' => $bookingData->booking->bookingmanager));
 
-                $ret['id'] = $booking->id;
-                $ret['cm'] = $booking->cm->id;
-                $ret['name'] = $booking->name;
-                $ret['intro'] = $booking->intro;
-                $ret['duration'] = $booking->duration;
-                $ret['points'] = $booking->points;
-                $ret['organizatorname'] = $booking->organizatorname;
-                $ret['eventtype'] = $booking->eventtype;
+                $ret['id'] = $bookingData->booking->id;
+                $ret['cm'] = $bookingData->cm->id;
+                $ret['name'] = $bookingData->booking->name;
+                $ret['intro'] = $bookingData->booking->intro;
+                $ret['duration'] = $bookingData->booking->duration;
+                $ret['points'] = $bookingData->booking->points;
+                $ret['organizatorname'] = $bookingData->booking->organizatorname;
+                $ret['eventtype'] = $bookingData->booking->eventtype;
                 $ret['bookingmanagername'] = $manager->firstname;
                 $ret['bookingmanagersurname'] = $manager->lastname;
                 $ret['bookingmanageremail'] = $manager->email;
                 $ret['categories'] = array();
                 $ret['options'] = array();
 
-                $booking->categories = new stdClass();
-                if ($booking->categoryid != '0' && $booking->categoryid != '') {
-                    $categoryies = explode(',', $booking->categoryid);
+                if ($bookingData->booking->categoryid != '0' && $bookingData->booking->categoryid != '') {
+                    $categoryies = explode(',', $bookingData->booking->categoryid);
 
                     if (!empty($categoryies) && count($categoryies) > 0) {
                         foreach ($categoryies as $category) {
@@ -134,15 +130,7 @@ class local_bookingapi_external extends external_api {
                     }
                 }
 
-                $booking->all_categories = new stdClass();
-                $allCategories = $DB->get_records('booking_category', array('course' => $courseid));
-                foreach ($allCategories as $category) {
-                    $booking->all_categories->{$category->id} = new stdClass();
-                    $booking->all_categories->{$category->id} = $category;
-                }
-
-                $booking->booking_options = new stdClass();
-                foreach ($records as $record) {
+                foreach ($bookingData->options as $record) {
                     $option = array();
                     $option['id'] = $record->id;
                     $option['text'] = $record->text;
@@ -157,7 +145,6 @@ class local_bookingapi_external extends external_api {
                     $option['teachers'] = array();
 
                     if ($printusers) {
-                        $booking->booking_options->{$record->id}->users = new stdClass();
                         $users = $DB->get_records('booking_answers', array('bookingid' => $record->bookingid, 'optionid' => $record->id));
                         foreach ($users as $user) {
                             $tmpUser = array();
@@ -170,7 +157,6 @@ class local_bookingapi_external extends external_api {
                         }
                     }
 
-                    $booking->booking_options->{$record->id}->teachers = new stdClass();
                     $users = $DB->get_records('booking_teachers', array('bookingid' => $record->bookingid, 'optionid' => $record->id));
                     foreach ($users as $user) {
                         $teacher = array();
