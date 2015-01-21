@@ -72,12 +72,13 @@ class local_bookingapi_external extends external_api {
         global $DB, $CFG;
 
         require_once($CFG->dirroot . '/mod/booking/locallib.php');
-        
+
         $returns = array();
 
         //Parameter validation
         //REQUIRED
-        $params = self::validate_parameters(self::bookings_parameters(), array('courseid' => $courseid, 'printusers' => $printusers, 'days' => $days));
+        $params = self::validate_parameters(self::bookings_parameters(),
+                        array('courseid' => $courseid, 'printusers' => $printusers, 'days' => $days));
 
         $bookings = $DB->get_records_select("booking", "course = {$courseid}");
 
@@ -85,93 +86,99 @@ class local_bookingapi_external extends external_api {
 
             $ret = array();
             $cm = get_coursemodule_from_instance('booking', $booking->id);
-        
+
             $options = array();
-            
+
             if ($days > 0) {
                 $timediff = strtotime('-' . $days . ' day');
                 $options['coursestarttime'] = $timediff;
-            }            
+            }
 
             if (strcmp($cm->visible, "1") == 0) {
-                $bookingData = new booking_options($cm->id, FALSE, $options);  
-                $bookingData->apply_tags();
-                $context = context_module::instance($cm->id);
+                $bookingData = new booking_options($cm->id, FALSE, $options);
 
-                $bookingData->booking->intro = file_rewrite_pluginfile_urls($bookingData->booking->intro, 'pluginfile.php', $context->id, 'mod_booking', 'intro', null);
+                if ($bookingData->booking->showinapi == "1") {
+                    $bookingData->apply_tags();
+                    $context = context_module::instance($cm->id);
 
-                $manager = $DB->get_record('user', array('username' => $bookingData->booking->bookingmanager));
+                    $bookingData->booking->intro = file_rewrite_pluginfile_urls($bookingData->booking->intro,
+                            'pluginfile.php', $context->id, 'mod_booking', 'intro', null);
 
-                $ret['id'] = $bookingData->booking->id;
-                $ret['cm'] = $bookingData->cm->id;
-                $ret['name'] = $bookingData->booking->name;
-                $ret['intro'] = $bookingData->booking->intro;
-                $ret['duration'] = $bookingData->booking->duration;
-                $ret['points'] = $bookingData->booking->points;
-                $ret['organizatorname'] = $bookingData->booking->organizatorname;
-                $ret['eventtype'] = $bookingData->booking->eventtype;
-                $ret['bookingmanagername'] = $manager->firstname;
-                $ret['bookingmanagersurname'] = $manager->lastname;
-                $ret['bookingmanageremail'] = $manager->email;
-                $ret['categories'] = array();
-                $ret['options'] = array();
+                    $manager = $DB->get_record('user', array('username' => $bookingData->booking->bookingmanager));
 
-                if ($bookingData->booking->categoryid != '0' && $bookingData->booking->categoryid != '') {
-                    $categoryies = explode(',', $bookingData->booking->categoryid);
+                    $ret['id'] = $bookingData->booking->id;
+                    $ret['cm'] = $bookingData->cm->id;
+                    $ret['name'] = $bookingData->booking->name;
+                    $ret['intro'] = $bookingData->booking->intro;
+                    $ret['duration'] = $bookingData->booking->duration;
+                    $ret['points'] = $bookingData->booking->points;
+                    $ret['organizatorname'] = $bookingData->booking->organizatorname;
+                    $ret['eventtype'] = $bookingData->booking->eventtype;
+                    $ret['bookingmanagername'] = $manager->firstname;
+                    $ret['bookingmanagersurname'] = $manager->lastname;
+                    $ret['bookingmanageremail'] = $manager->email;
+                    $ret['categories'] = array();
+                    $ret['options'] = array();
 
-                    if (!empty($categoryies) && count($categoryies) > 0) {
-                        foreach ($categoryies as $category) {
-                            $cat = array();
-                            $cat['id'] = $category;
-                            $cat['name'] = $DB->get_field('booking_category', 'name', array('id' => $category));
+                    if ($bookingData->booking->categoryid != '0' && $bookingData->booking->categoryid != '') {
+                        $categoryies = explode(',', $bookingData->booking->categoryid);
 
-                            $ret['categories'][] = $cat;
+                        if (!empty($categoryies) && count($categoryies) > 0) {
+                            foreach ($categoryies as $category) {
+                                $cat = array();
+                                $cat['id'] = $category;
+                                $cat['name'] = $DB->get_field('booking_category', 'name', array('id' => $category));
+
+                                $ret['categories'][] = $cat;
+                            }
                         }
                     }
-                }
 
-                foreach ($bookingData->options as $record) {
-                    $option = array();
-                    $option['id'] = $record->id;
-                    $option['text'] = $record->text;
-                    $option['maxanswers'] = $record->maxanswers;
-                    $option['coursestarttime'] = $record->coursestarttime;
-                    $option['courseendtime'] = $record->courseendtime;
-                    $option['description'] = $record->description;
-                    $option['location'] = $record->location;
-                    $option['institution'] = $record->institution;
-                    $option['address'] = $record->address;
-                    $option['users'] = array();
-                    $option['teachers'] = array();
+                    foreach ($bookingData->options as $record) {
+                        $option = array();
+                        $option['id'] = $record->id;
+                        $option['text'] = $record->text;
+                        $option['maxanswers'] = $record->maxanswers;
+                        $option['coursestarttime'] = $record->coursestarttime;
+                        $option['courseendtime'] = $record->courseendtime;
+                        $option['description'] = $record->description;
+                        $option['location'] = $record->location;
+                        $option['institution'] = $record->institution;
+                        $option['address'] = $record->address;
+                        $option['users'] = array();
+                        $option['teachers'] = array();
 
-                    if ($printusers) {
-                        $users = $DB->get_records('booking_answers', array('bookingid' => $record->bookingid, 'optionid' => $record->id));
+                        if ($printusers) {
+                            $users = $DB->get_records('booking_answers',
+                                    array('bookingid' => $record->bookingid, 'optionid' => $record->id));
+                            foreach ($users as $user) {
+                                $tmpUser = array();
+                                $ruser = $DB->get_record('user', array('id' => $user->userid));
+                                $tmpUser['id'] = $ruser->id;
+                                $tmpUser['firstname'] = $ruser->firstname;
+                                $tmpUser['lastname'] = $ruser->lastname;
+
+                                $option['users'][] = $tmpUser;
+                            }
+                        }
+
+                        $users = $DB->get_records('booking_teachers',
+                                array('bookingid' => $record->bookingid, 'optionid' => $record->id));
                         foreach ($users as $user) {
-                            $tmpUser = array();
+                            $teacher = array();
                             $ruser = $DB->get_record('user', array('id' => $user->userid));
-                            $tmpUser['id'] = $ruser->id;
-                            $tmpUser['firstname'] = $ruser->firstname;
-                            $tmpUser['lastname'] = $ruser->lastname;
+                            $teacher['id'] = $ruser->id;
+                            $teacher['firstname'] = $ruser->firstname;
+                            $teacher['lastname'] = $ruser->lastname;
 
-                            $option['users'][] = $tmpUser;
+                            $option['teachers'][] = $teacher;
                         }
+
+                        $ret['options'][] = $option;
                     }
 
-                    $users = $DB->get_records('booking_teachers', array('bookingid' => $record->bookingid, 'optionid' => $record->id));
-                    foreach ($users as $user) {
-                        $teacher = array();
-                        $ruser = $DB->get_record('user', array('id' => $user->userid));
-                        $teacher['id'] = $ruser->id;
-                        $teacher['firstname'] = $ruser->firstname;
-                        $teacher['lastname'] = $ruser->lastname;
-
-                        $option['teachers'][] = $teacher;
-                    }
-
-                    $ret['options'][] = $option;
+                    $returns[] = $ret;
                 }
-
-                $returns[] = $ret;
             }
         }
         return $returns;
