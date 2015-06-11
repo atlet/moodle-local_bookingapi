@@ -155,6 +155,7 @@ class local_bookingapi_external extends external_api {
                                 $tmpUser = array();
                                 $ruser = $DB->get_record('user', array('id' => $user->userid));
                                 $tmpUser['id'] = $ruser->id;
+                                $tmpUser['username'] = $ruser->username;
                                 $tmpUser['firstname'] = $ruser->firstname;
                                 $tmpUser['lastname'] = $ruser->lastname;
 
@@ -168,6 +169,7 @@ class local_bookingapi_external extends external_api {
                             $teacher = array();
                             $ruser = $DB->get_record('user', array('id' => $user->userid));
                             $teacher['id'] = $ruser->id;
+                            $teacher['username'] = $ruser->username;
                             $teacher['firstname'] = $ruser->firstname;
                             $teacher['lastname'] = $ruser->lastname;
 
@@ -235,12 +237,14 @@ class local_bookingapi_external extends external_api {
                 'users' => new external_multiple_structure(new external_single_structure(
                         array(
                     'id' => new external_value(PARAM_INT, 'User ID'),
+                    'username' => new external_value(PARAM_TEXT, 'Username'),
                     'firstname' => new external_value(PARAM_TEXT, 'First name'),
                     'lastname' => new external_value(PARAM_TEXT, 'First')
                         ))),
                 'teachers' => new external_multiple_structure(new external_single_structure(
                         array(
                     'id' => new external_value(PARAM_INT, 'User ID'),
+                    'username' => new external_value(PARAM_TEXT, 'Username'),
                     'firstname' => new external_value(PARAM_TEXT, 'First name'),
                     'lastname' => new external_value(PARAM_TEXT, 'First')
                         )))
