@@ -20,6 +20,9 @@
  * @copyright  2014 Andraž Prinčič (http://www.princic.net)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+
+ini_set('max_execution_time', 600);
+
 require_once("../../config.php");
 require_once($CFG->libdir . "/externallib.php");
 require_once($CFG->libdir . "/filelib.php");
