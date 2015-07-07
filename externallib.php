@@ -108,6 +108,7 @@ class local_bookingapi_external extends external_api {
 
                     $ret['id'] = $bookingData->booking->id;
                     $ret['cm'] = $bookingData->cm->id;
+                    $ret['timemodified'] = $bookingData->booking->timemodified;
                     $ret['name'] = $bookingData->booking->name;
                     $ret['intro'] = $bookingData->booking->intro;
                     $ret['duration'] = $bookingData->booking->duration;
@@ -150,6 +151,7 @@ class local_bookingapi_external extends external_api {
                         $option = array();
                         $option['id'] = $record->id;
                         $option['text'] = $record->text;
+                        $option['timemodified'] = $record->timemodified;
                         $option['maxanswers'] = $record->maxanswers;
                         $option['coursestarttime'] = $record->coursestarttime;
                         $option['courseendtime'] = $record->courseendtime;
@@ -159,7 +161,7 @@ class local_bookingapi_external extends external_api {
                         $option['institutionid'] = $institutionid->id;
                         $option['address'] = $record->address;
                         $option['users'] = array();
-                        $option['teachers'] = array();
+                        $option['teachers'] = array();                        
 
                         if ($printusers) {
                             $users = $DB->get_records('booking_answers',
@@ -221,6 +223,7 @@ class local_bookingapi_external extends external_api {
                 array(
             'id' => new external_value(PARAM_INT, 'Booking ID'),
             'cm' => new external_value(PARAM_INT, 'CM'),
+            'timemodified' => new external_value(PARAM_INT, 'Time modified'),
             'name' => new external_value(PARAM_TEXT, 'Course name'),
             'intro' => new external_value(PARAM_RAW, 'Description'),
             'duration' => new external_value(PARAM_TEXT, 'Duration'),
@@ -240,6 +243,7 @@ class local_bookingapi_external extends external_api {
                     array(
                 'id' => new external_value(PARAM_INT, 'Option ID'),
                 'text' => new external_value(PARAM_TEXT, 'Description'),
+                'timemodified' => new external_value(PARAM_INT, 'Time modified'),
                 'maxanswers' => new external_value(PARAM_INT, 'Max participants'),
                 'coursestarttime' => new external_value(PARAM_INT, 'Start time'),
                 'courseendtime' => new external_value(PARAM_INT, 'End time'),
