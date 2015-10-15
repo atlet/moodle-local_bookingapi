@@ -20,13 +20,32 @@
  * @copyright  2014 Andraž Prinčič (http://www.princic.net)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
 ini_set('max_execution_time', 600);
 
 require_once("../../config.php");
 require_once($CFG->libdir . "/externallib.php");
 require_once($CFG->libdir . "/filelib.php");
 require_once($CFG->libdir . "/datalib.php");
+
+function showSubCategories($cat_id, $DB, $courseid) {
+        $returns = array();
+        $categories = $DB->get_records('booking_category', array('cid' => $cat_id));
+        if (count((array) $categories) > 0) {
+            foreach ($categories as $category) {
+                $cat = array();
+
+                $cat['id'] = $category->id;
+                $cat['cid'] = $category->cid;
+                $cat['name'] = $category->name;  
+                
+                $returns[] = $cat;
+                
+                $returns = array_merge($returns, showSubCategories($category->id, $DB, $courseid));
+            }
+        }
+        
+        return $returns;
+    }
 
 class local_bookingapi_external extends external_api {
 
@@ -50,15 +69,16 @@ class local_bookingapi_external extends external_api {
             'courseid' => new external_value(PARAM_TEXT, 'Course id', VALUE_DEFAULT, '0')
                 )
         );
-    }
+    }    
 
     public static function categories($courseid = '0') {
         global $DB;
 
         $returns = array();
 
-        $allCategories = $DB->get_records('booking_category', array('course' => $courseid), 'cid ASC');
-        foreach ($allCategories as $category) {
+        $categories = $DB->get_records('booking_category', array('course' => $courseid, 'cid' => 0));
+
+        foreach ($categories as $category) {
             $cat = array();
 
             $cat['id'] = $category->id;
@@ -66,6 +86,21 @@ class local_bookingapi_external extends external_api {
             $cat['name'] = $category->name;
 
             $returns[] = $cat;
+
+            $subcategories = $DB->get_records('booking_category', array('course' => $courseid, 'cid' => $category->id));
+            if (count((array) $subcategories < 0)) {
+                foreach ($subcategories as $subcat) {
+                    $cat = array();
+
+                    $cat['id'] = $subcat->id;
+                    $cat['cid'] = $subcat->cid;
+                    $cat['name'] = $subcat->name;
+
+                    $returns[] = $cat;
+
+                    $returns = array_merge($returns, showSubCategories($subcat->id, $DB, $courseid));
+                }
+            }
         }
 
         return $returns;
@@ -139,18 +174,19 @@ class local_bookingapi_external extends external_api {
                     }
 
                     foreach ($bookingData->options as $record) {
-                        
+
                         $institutionid = new stdClass();
                         $institutionid->id = 0;
-                        
+
                         if (!empty($record->institution)) {
-                            $institutionid = $DB->get_record_sql('SELECT id FROM {booking_institutions} WHERE course = :course AND name LIKE :name LIMIT 1', array('course' => $courseid, 'name' => $record->institution));
+                            $institutionid = $DB->get_record_sql('SELECT id FROM {booking_institutions} WHERE course = :course AND name LIKE :name LIMIT 1',
+                                    array('course' => $courseid, 'name' => $record->institution));
                             if (!$institutionid) {
                                 $institutionid = new stdClass();
                                 $institutionid->id = 0;
                             }
                         }
-                        
+
                         $option = array();
                         $option['id'] = $record->id;
                         $option['text'] = $record->text;
@@ -164,7 +200,7 @@ class local_bookingapi_external extends external_api {
                         $option['institutionid'] = $institutionid->id;
                         $option['address'] = $record->address;
                         $option['users'] = array();
-                        $option['teachers'] = array();                        
+                        $option['teachers'] = array();
 
                         if ($printusers) {
                             $users = $DB->get_records('booking_answers',
