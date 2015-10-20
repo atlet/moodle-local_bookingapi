@@ -153,6 +153,7 @@ class local_bookingapi_external extends external_api {
                     $ret['points'] = $bookingData->booking->points;
                     $ret['organizatorname'] = $bookingData->booking->organizatorname;
                     $ret['eventtype'] = $bookingData->booking->eventtype;
+                    $ret['bookingmanagerid'] = $manager->id;
                     $ret['bookingmanagername'] = $manager->firstname;
                     $ret['bookingmanagersurname'] = $manager->lastname;
                     $ret['bookingmanageremail'] = $manager->email;
@@ -269,6 +270,7 @@ class local_bookingapi_external extends external_api {
             'points' => new external_value(PARAM_RAW, 'Points'),
             'organizatorname' => new external_value(PARAM_TEXT, 'Organizator name'),
             'eventtype' => new external_value(PARAM_TEXT, 'Event type'),
+            'bookingmanagerid' => new external_value(PARAM_INT, 'Booking manager ID'),
             'bookingmanagername' => new external_value(PARAM_TEXT, 'Booking manager name'),
             'bookingmanagersurname' => new external_value(PARAM_TEXT, 'Booking manager surname'),
             'bookingmanageremail' => new external_value(PARAM_TEXT, 'Booking manager e-mail'),
