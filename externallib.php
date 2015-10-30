@@ -28,24 +28,24 @@ require_once($CFG->libdir . "/filelib.php");
 require_once($CFG->libdir . "/datalib.php");
 
 function showSubCategories($cat_id, $DB, $courseid) {
-        $returns = array();
-        $categories = $DB->get_records('booking_category', array('cid' => $cat_id));
-        if (count((array) $categories) > 0) {
-            foreach ($categories as $category) {
-                $cat = array();
+    $returns = array();
+    $categories = $DB->get_records('booking_category', array('cid' => $cat_id));
+    if (count((array) $categories) > 0) {
+        foreach ($categories as $category) {
+            $cat = array();
 
-                $cat['id'] = $category->id;
-                $cat['cid'] = $category->cid;
-                $cat['name'] = $category->name;  
-                
-                $returns[] = $cat;
-                
-                $returns = array_merge($returns, showSubCategories($category->id, $DB, $courseid));
-            }
+            $cat['id'] = $category->id;
+            $cat['cid'] = $category->cid;
+            $cat['name'] = $category->name;
+
+            $returns[] = $cat;
+
+            $returns = array_merge($returns, showSubCategories($category->id, $DB, $courseid));
         }
-        
-        return $returns;
     }
+
+    return $returns;
+}
 
 class local_bookingapi_external extends external_api {
 
@@ -69,7 +69,7 @@ class local_bookingapi_external extends external_api {
             'courseid' => new external_value(PARAM_TEXT, 'Course id', VALUE_DEFAULT, '0')
                 )
         );
-    }    
+    }
 
     public static function categories($courseid = '0') {
         global $DB;
@@ -213,6 +213,7 @@ class local_bookingapi_external extends external_api {
                                 $tmpUser['username'] = $ruser->username;
                                 $tmpUser['firstname'] = $ruser->firstname;
                                 $tmpUser['lastname'] = $ruser->lastname;
+                                $tmpUser['email'] = $ruser->email;
 
                                 $option['users'][] = $tmpUser;
                             }
@@ -227,6 +228,7 @@ class local_bookingapi_external extends external_api {
                             $teacher['username'] = $ruser->username;
                             $teacher['firstname'] = $ruser->firstname;
                             $teacher['lastname'] = $ruser->lastname;
+                            $teacher['email'] = $ruser->email;
 
                             $option['teachers'][] = $teacher;
                         }
@@ -298,14 +300,16 @@ class local_bookingapi_external extends external_api {
                     'id' => new external_value(PARAM_INT, 'User ID'),
                     'username' => new external_value(PARAM_TEXT, 'Username'),
                     'firstname' => new external_value(PARAM_TEXT, 'First name'),
-                    'lastname' => new external_value(PARAM_TEXT, 'First')
+                    'lastname' => new external_value(PARAM_TEXT, 'First'),
+                    'email' => new external_value(PARAM_TEXT, 'Email')
                         ))),
                 'teachers' => new external_multiple_structure(new external_single_structure(
                         array(
                     'id' => new external_value(PARAM_INT, 'User ID'),
                     'username' => new external_value(PARAM_TEXT, 'Username'),
                     'firstname' => new external_value(PARAM_TEXT, 'First name'),
-                    'lastname' => new external_value(PARAM_TEXT, 'First')
+                    'lastname' => new external_value(PARAM_TEXT, 'First'),
+                    'email' => new external_value(PARAM_TEXT, 'Email')
                         )))
                     )
                     ))
