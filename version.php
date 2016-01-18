@@ -22,3 +22,4 @@ $plugin->requires = 2010112400;  // Requires this Moodle version - at least 2.0
 $plugin->cron     = 0;
 $plugin->release = '0.3 (Build: 2014091500)';
 $plugin->maturity = MATURITY_STABLE;
+$plugin->component = 'local_bookingapi';
