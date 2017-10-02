@@ -133,7 +133,7 @@ class local_bookingapi_external extends external_api {
             }
 
             if (strcmp($cm->visible, "1") == 0) {
-                $bookingData = new booking_options($cm->id, FALSE, $options);
+                $bookingData = new \mod_booking\booking($cm->id);
 
                 if ($bookingData->booking->showinapi == "1") {
                     $bookingData->apply_tags();
@@ -174,7 +174,7 @@ class local_bookingapi_external extends external_api {
                         }
                     }
 
-                    foreach ($bookingData->options as $record) {
+                    foreach ($bookingData->get_all_options() as $record) {
 
                         $institutionid = new stdClass();
                         $institutionid->id = 0;
