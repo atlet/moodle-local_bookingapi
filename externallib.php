@@ -115,8 +115,7 @@ class local_bookingapi_external extends external_api {
 
         //Parameter validation
         //REQUIRED
-        $params = self::validate_parameters(self::bookings_parameters(),
-                        array('courseid' => $courseid, 'printusers' => $printusers, 'days' => $days));
+        $params = self::validate_parameters(self::bookings_parameters(), array('courseid' => $courseid, 'printusers' => $printusers, 'days' => $days));
 
         $bookings = $DB->get_records_select("booking", "course = {$courseid}");
 
@@ -139,8 +138,7 @@ class local_bookingapi_external extends external_api {
                     $bookingData->apply_tags();
                     $context = context_module::instance($cm->id);
 
-                    $bookingData->booking->intro = file_rewrite_pluginfile_urls($bookingData->booking->intro,
-                            'pluginfile.php', $context->id, 'mod_booking', 'intro', null);
+                    $bookingData->booking->intro = file_rewrite_pluginfile_urls($bookingData->booking->intro, 'pluginfile.php', $context->id, 'mod_booking', 'intro', null);
 
                     $manager = $DB->get_record('user', array('username' => $bookingData->booking->bookingmanager));
 
@@ -157,6 +155,7 @@ class local_bookingapi_external extends external_api {
                     $ret['bookingmanagername'] = $manager->firstname;
                     $ret['bookingmanagersurname'] = $manager->lastname;
                     $ret['bookingmanageremail'] = $manager->email;
+                    $ret['myfilemanager'] = external_util::get_area_files($context->id, 'mod_booking', 'myfilemanager', false, false);
                     $ret['categories'] = array();
                     $ret['options'] = array();
 
@@ -180,8 +179,7 @@ class local_bookingapi_external extends external_api {
                         $institutionid->id = 0;
 
                         if (!empty($record->institution)) {
-                            $institutionid = $DB->get_record_sql('SELECT id FROM {booking_institutions} WHERE course = :course AND name LIKE :name LIMIT 1',
-                                    array('course' => $courseid, 'name' => $record->institution));
+                            $institutionid = $DB->get_record_sql('SELECT id FROM {booking_institutions} WHERE course = :course AND name LIKE :name LIMIT 1', array('course' => $courseid, 'name' => $record->institution));
                             if (!$institutionid) {
                                 $institutionid = new stdClass();
                                 $institutionid->id = 0;
@@ -204,8 +202,7 @@ class local_bookingapi_external extends external_api {
                         $option['teachers'] = array();
 
                         if ($printusers) {
-                            $users = $DB->get_records('booking_answers',
-                                    array('bookingid' => $record->bookingid, 'optionid' => $record->id));
+                            $users = $DB->get_records('booking_answers', array('bookingid' => $record->bookingid, 'optionid' => $record->id));
                             foreach ($users as $user) {
                                 $tmpUser = array();
                                 $ruser = $DB->get_record('user', array('id' => $user->userid));
@@ -219,8 +216,7 @@ class local_bookingapi_external extends external_api {
                             }
                         }
 
-                        $users = $DB->get_records('booking_teachers',
-                                array('bookingid' => $record->bookingid, 'optionid' => $record->id));
+                        $users = $DB->get_records('booking_teachers', array('bookingid' => $record->bookingid, 'optionid' => $record->id));
                         foreach ($users as $user) {
                             $teacher = array();
                             $ruser = $DB->get_record('user', array('id' => $user->userid));
@@ -276,6 +272,7 @@ class local_bookingapi_external extends external_api {
             'bookingmanagername' => new external_value(PARAM_TEXT, 'Booking manager name'),
             'bookingmanagersurname' => new external_value(PARAM_TEXT, 'Booking manager surname'),
             'bookingmanageremail' => new external_value(PARAM_TEXT, 'Booking manager e-mail'),
+            'myfilemanager' => new external_files('Attachment', VALUE_OPTIONAL),
             'categories' => new external_multiple_structure(new external_single_structure(
                     array(
                 'id' => new external_value(PARAM_INT, 'Category ID'),
